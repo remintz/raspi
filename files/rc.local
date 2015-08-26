@@ -1,4 +1,4 @@
-#!/bin/sh -e
+#!/bin/bash
 #
 # rc.local
 #
@@ -37,9 +37,9 @@ ssids=( '#SSID' )
 connected=false
 for ssid in "${ssids[@]}"
 do
-    if iwlist #INTERFACE scan | grep $ssid > /dev/null
+    if iwlist #INTERFACE scan | grep #SSID > /dev/null
     then
-        echo "First WiFi in range has SSID:" $ssid
+        echo "First WiFi in range has SSID:" #SSID
         echo "Starting supplicant for WPA/WPA2"
         wpa_supplicant -B -i #INTERFACE -c /etc/wpa_supplicant/wpa_supplicant.conf > /dev/null 2>&1
         echo "Obtaining IP from DHCP"
@@ -54,7 +54,7 @@ do
             break
         fi
     else
-        echo "Not in range, WiFi with SSID:" $ssid
+        echo "Not in range, WiFi with SSID:" #SSID
     fi
 done
  

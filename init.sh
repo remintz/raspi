@@ -61,7 +61,7 @@ fi
 # ----- Setup Wifi ------------------------------------------
 setupWifi=0
 setupAdhocWifi=0
-adhocIpGroup = "10.0.0"
+adhocIpGroup="10.0.0"
 echo -n "Set up wireless adapter? ('y' for yes) "
 read -n 1 q; echo
 if [ "$q" == "y" ] || [ "$q" == "Y" ]; then
