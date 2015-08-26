@@ -61,6 +61,7 @@ fi
 # ----- Setup Wifi ------------------------------------------
 setupWifi=0
 setupAdhocWifi=0
+adhocIpGroup = "10.0.0"
 echo -n "Set up wireless adapter? ('y' for yes) "
 read -n 1 q; echo
 if [ "$q" == "y" ] || [ "$q" == "Y" ]; then
@@ -316,19 +317,18 @@ if [ "$setupAdhocWifi" == "1" ]; then
 		sudo cp /etc/dhcp/dhcp.conf /etc/dhcp/dhcp.conf.bak
 		sudo cp /etc/rc.local /etc/rc.local.bak
 
-		cat /etc/default/isc-dhcp-server | sed -e 's/INTERFACES=\"\"/INTERFACES=\"$interface\"/' > ./isc-dhcp-server
+		cat /etc/default/isc-dhcp-server | sed -e "s/INTERFACES="""/INTERFACES="""$interface/g" > ./isc-dhcp-server
 		sudo mv ./isc-dhcp-server /etc/default/isc-dhcp-server
 
-		cat files/dhcpd.conf | sed -e "s/\#INTERFACE/$interface/" -e "s/\#ADHOC_SSID/$adhocSsid/" -e "s/\#ADHOC_IP_GROUP/$adhocIpGroup/" > ./dhcp.conf
+		cat files/dhcpd.conf | sed -e "s/\#INTERFACE/$interface/" -e "s/\#ADHOC_SSID/$adhocSsid/g" -e "s/\#ADHOC_IP_GROUP/$adhocIpGroup/g" > ./dhcp.conf
 		sudo mv -f ./dhcp.conf /etc/dhcp/dhcpd.conf
 
-		cat files/rc.local | sed -e "s/\#INTERFACE/$interface/" -e "s/\#ADHOC_SSID/$adhocSsid/" -e "s/\#ADHOC_IP_GROUP/$adhocIpGroup/" -e "s/\#SSID/$ssid/" > ./rc.local
+		cat files/rc.local | sed -e "s/\#INTERFACE/$interface/" -e "s/\#ADHOC_SSID/$adhocSsid/g" -e "s/\#ADHOC_IP_GROUP/$adhocIpGroup/g" -e "s/\#SSID/$ssid/g" > ./rc.local
 		sudo mv -f ./rc.local /etc/rc.local
 
 		sudo update-rc.d -f isc-dhcp-server disable 		# prevent dhcp server to start automatically
 
 		echo -e "\n\nAdhoc Wireless Networking setup complete\n\n"
-		fi
 	else
 		echo -e "Cannot setup adhoc wifi because wifi networking was not set"
 	fi
