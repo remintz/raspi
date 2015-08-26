@@ -60,6 +60,7 @@ fi
 
 # ----- Setup Wifi ------------------------------------------
 setupWifi=0
+setupAdhocWifi=0
 echo -n "Set up wireless adapter? ('y' for yes) "
 read -n 1 q; echo
 if [ "$q" == "y" ] || [ "$q" == "Y" ]; then
@@ -69,6 +70,16 @@ if [ "$q" == "y" ] || [ "$q" == "Y" ]; then
 		echo -n "Enter your SSID: "; read ssid
 		echo -n "Enter your WPA key: "; read wpa
 		echo -n "Wifi information ok [y/n]? "; read -n 1 cont; echo
+		echo -n "Set up adhoc wifi network when cannot connect to configured wifi? ('y' for yes) "
+		read -n 1 q; echo
+		if [ "$q" == "y" ] || [ "$q" == "Y" ]; then
+			setupAdhocWifi=1
+			cont="n"
+			while [ "$cont" != "y" ] && [ "$cont" != "Y" ]; do
+				echo -n "Enter SSID to be used: "; read adhocSsid
+				echo -n "Adhoc Wifi information ok [y/n]? "; read -n 1 cont; echo
+			done
+		fi
 	done
 fi
 # echo -e "\n"
@@ -280,6 +291,48 @@ fi
 
 
 
+
+#####################################################################################
+## SETTING UP ADHOC WIRELESS NETWORKING
+## see http://lcdev.dk/2012/11/18/raspberry-pi-tutorial-connect-to-wifi-or-create-an-encrypted-dhcp-enabled-ad-hoc-network-as-fallback/#comment-640
+#####################################################################################
+
+if [ "$setupAdhocWifi" == "1" ]; then
+
+	clear; echo -e "\n\n\n\n\n\n\n\n\n\n"
+	echo -e " Setting up addhoc wireless networking..."
+	echo -e "-------------------------------------------------------------------------------------"
+	echo -e "Adhoc connection will be set whenever not able to connect to SSID $ssid"
+	echo -e "The SSID for the adhoc connection is: $adhocSsid"
+	echo -e "The IP Address of the Pi will be: $adhocIpGroup.200"
+	echo -e "DHCP is enabled"
+
+	if [ "$setupWifi" == "1" ]; then
+
+		sudo apt-get install isc-dhcp-server			# dhcp server
+
+		#### BACKUP
+		sudo cp /etc/default/isc-dhcp-server /etc/default/isc-dhcp-server.bak
+		sudo cp /etc/dhcp/dhcp.conf /etc/dhcp/dhcp.conf.bak
+		sudo cp /etc/rc.local /etc/rc.local.bak
+
+		sudo cat /etc/default/isc-dhcp-server | sed -e 's/INTERFACES=\"\"/INTERFACES=\"$interface\"/' > /etc/default/isc-dhcp-server
+		cat files/dhcpd.conf | sed -e "s/\#INTERFACE/$interface/" -e "s/\#ADHOC_SSID/$adhocSsid/" -e "s/\#ADHOC_IP_GROUP/$adhocIpGroup" > ./dhcp.conf
+		sudo mv -f ./dhcp.conf /etc/dhcp/dhcpd.conf
+
+		cat files/rc.local | sed -e "s/\#INTERFACE/$interface/" -e "s/\#ADHOC_SSID/$adhocSsid/" -e "s/\#ADHOC_IP_GROUP/$adhocIpGroup" -e "s/\#SSID/$ssid" > ./rc.local
+		sudo mv -f ./rc.local /etc/rc.local
+
+		sudo update-rc.d -f isc-dhcp-server disable 		# prevent dhcp server to start automatically
+
+		echo -e "\n\nAdhoc Wireless Networking setup complete\n\n"
+		fi
+	else
+		echo -e "Cannot setup adhoc wifi because wifi networking was not set"
+	fi
+	# echo -n "-- Press any key to continue --"; read -n 1 cont; echo
+
+fi
 
 
 #####################################################################################
