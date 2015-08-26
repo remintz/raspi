@@ -325,6 +325,8 @@ if [ "$setupAdhocWifi" == "1" ]; then
 
 		cat files/rc.local | sed -e "s/\#INTERFACE/$interface/" -e "s/\#ADHOC_SSID/$adhocSsid/g" -e "s/\#ADHOC_IP_GROUP/$adhocIpGroup/g" -e "s/\#SSID/$ssid/g" > ./rc.local
 		sudo mv -f ./rc.local /etc/rc.local
+		sudo chown root:root /etc/rc.local
+		sudo chmod +x /etc/rc.local
 
 		sudo update-rc.d -f isc-dhcp-server disable 		# prevent dhcp server to start automatically
 
