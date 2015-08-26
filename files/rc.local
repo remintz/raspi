@@ -24,7 +24,7 @@ createAdHocNetwork(){
     ifconfig #INTERFACE up
     iwconfig #INTERFACE mode ad-hoc
     iwconfig #INTERFACE essid #ADHOC_SSID
-    ifconfig #INTERFACE #ADHOC_IP_GROUP.200 netmask 255.255.255.0 up
+    ifconfig #INTERFACE #ADHOC_IP_GROUP.200 netmask 255.255.255.0
     /usr/sbin/dhcpd #INTERFACE
     echo "Ad-hoc network created"
 }

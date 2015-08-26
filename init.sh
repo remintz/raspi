@@ -319,11 +319,13 @@ if [ "$setupAdhocWifi" == "1" ]; then
 
 		cat /etc/default/isc-dhcp-server | sed -e "s/INTERFACES="""/INTERFACES="""$interface/g" > ./isc-dhcp-server
 		sudo mv ./isc-dhcp-server /etc/default/isc-dhcp-server
+		sudo chown root:root /etc/default/isc-dhcp-server
 
-		cat files/dhcpd.conf | sed -e "s/\#INTERFACE/$interface/" -e "s/\#ADHOC_SSID/$adhocSsid/g" -e "s/\#ADHOC_IP_GROUP/$adhocIpGroup/g" > ./dhcp.conf
+		cat files/dhcpd.conf | sed -e "s/\#INTERFACE/$interface/g" -e "s/\#ADHOC_SSID/$adhocSsid/g" -e "s/\#ADHOC_IP_GROUP/$adhocIpGroup/g" > ./dhcp.conf
 		sudo mv -f ./dhcp.conf /etc/dhcp/dhcpd.conf
+		sudo chown root:root /etc/dhcp/dhcpd.conf
 
-		cat files/rc.local | sed -e "s/\#INTERFACE/$interface/" -e "s/\#ADHOC_SSID/$adhocSsid/g" -e "s/\#ADHOC_IP_GROUP/$adhocIpGroup/g" -e "s/\#SSID/$ssid/g" > ./rc.local
+		cat files/rc.local | sed -e "s/\#INTERFACE/$interface/g" -e "s/\#ADHOC_SSID/$adhocSsid/g" -e "s/\#ADHOC_IP_GROUP/$adhocIpGroup/g" -e "s/\#SSID/$ssid/g" > ./rc.local
 		sudo mv -f ./rc.local /etc/rc.local
 		sudo chown root:root /etc/rc.local
 		sudo chmod +x /etc/rc.local
