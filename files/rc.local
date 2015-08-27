@@ -21,10 +21,16 @@ fi
  
 createAdHocNetwork(){
     echo "Creating ad-hoc network"
-    ifconfig #INTERFACE up
-    iwconfig #INTERFACE mode ad-hoc
-    iwconfig #INTERFACE essid #ADHOC_SSID
+    ifdown #INTERFACE
+	killall dhclient
+	wpa_supplicant -B -i #INTERFACE -c /etc/wpa_supplicant/wpa_supplicant.conf > /dev/null 2>&1
+	wpa_cli -i#INTERFACE add_network
+	wpa_cli -i#INTERFACE set_network 0 mode 1
+	wpa_cli -i#INTERFACE set_network 0 ssid '"#ADHOC_SSID"'
+	wpa_cli -i#INTERFACE set_network 0 key_mgmt NONE
     ifconfig #INTERFACE #ADHOC_IP_GROUP.200 netmask 255.255.255.0
+	wpa_cli -i#INTERFACE enable_network 0
+    ifconfig #INTERFACE up
     /usr/sbin/dhcpd #INTERFACE
     echo "Ad-hoc network created"
 }

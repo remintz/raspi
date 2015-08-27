@@ -282,8 +282,8 @@ if [ "$setupWifi" == "1" ]; then
 
 		cat files/interfaces | sed -e "s/\#INTERFACE/$interface/" -e "s/\#SSID/$ssid/" -e "s/\#WPA/$wpa/" > ./interfaces
 		sudo mv -f ./interfaces /etc/network/
-		sudo ifdown $interface
-		sudo ifup $interface
+		#sudo ifdown $interface
+		#sudo ifup $interface
 		echo -e "\n\nWireless Networking setup complete\n\n"
 	fi
 	# echo -n "-- Press any key to continue --"; read -n 1 cont; echo
@@ -311,7 +311,7 @@ if [ "$setupAdhocWifi" == "1" ]; then
 	if [ "$setupWifi" == "1" ]; then
 
 		sudo apt-get install isc-dhcp-server			# dhcp server
-
+		echo -e "^^^^^ the failure message above should be ignored."
 		#### BACKUP
 		sudo cp /etc/default/isc-dhcp-server /etc/default/isc-dhcp-server.bak
 		sudo cp /etc/dhcp/dhcp.conf /etc/dhcp/dhcp.conf.bak
