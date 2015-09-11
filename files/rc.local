@@ -28,10 +28,12 @@ createAdHocNetwork(){
 	wpa_cli -i#INTERFACE set_network 0 mode 1
 	wpa_cli -i#INTERFACE set_network 0 ssid '"#ADHOC_SSID"'
 	wpa_cli -i#INTERFACE set_network 0 key_mgmt NONE
-    ifconfig #INTERFACE #ADHOC_IP_GROUP.200 netmask 255.255.255.0
+    ifconfig #INTERFACE #ADHOC_IP_GROUP.1 netmask 255.255.255.0
 	wpa_cli -i#INTERFACE enable_network 0
     ifconfig #INTERFACE up
     /usr/sbin/dhcpd #INTERFACE
+    # yes... again... just in case
+    ifconfig #INTERFACE #ADHOC_IP_GROUP.1 netmask 255.255.255.0
     echo "Ad-hoc network created"
 }
  

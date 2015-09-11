@@ -455,9 +455,7 @@ if [ "$installPuppet" == "1" ]; then
 	sudo cp files/default_puppet /etc/default/puppet
 	cat files/puppet.conf | sed -e "s/\#PUPPET_SERVER/$puppetMasterURL/" > ./puppet.conf
 	sudo mv ./puppet.conf /etc/puppet/
-
-	sudo service puppet start
-
+	
 	echo -e "\n\n Puppet agent install complete"
 	# echo -n "-- Press any key to continue --"; read -n 1 cont; echo
 fi
