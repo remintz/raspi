@@ -8,7 +8,7 @@ echo -e "\n- Make sure it is connected to the Internet... (probably use an ether
 echo -en "\n\n-- Press any key to continue --"; read -n 1 cont; echo
 
 
-
+nodeVersion="v0.12.2"
 
 #####################################################################################
 ## GATHERING USER INPUT
@@ -126,7 +126,6 @@ read -n 1 q; echo
 if [ "$q" == "y" ] || [ "$q" == "Y" ]; then
 	expandFilesystem=1
 fi
-# echo -e "\n"
 
 # ----- Setup hostname --------------------------------------
 cont="n"
@@ -141,7 +140,21 @@ if [ "$q" == "y" ] || [ "$q" == "Y" ]; then
 		echo -n "Hostname ok [y/n]? "; read -n 1 cont; echo
 	done
 fi
-# echo -e "\n"
+
+# ----- Install puppet --------------------------------------
+cont="n"
+installPuppet=0
+echo -n "Install Puppet agent? ('y' for yes) "
+read -n 1 q; echo
+if [ "$q" == "y" ] || [ "$q" == "Y" ]; then
+	installPuppet=1
+	cont="n"
+	while [ "$cont" != "y" ] && [ "$cont" != "Y" ]; do
+		echo -n "Enter Puppet master url: "; read puppetMasterURL
+		echo -n "Enter domain (ex: mydomain.com): "; read domain
+		echo -n "Puppet settings ok [y/n]? "; read -n 1 cont; echo
+	done
+fi
 
 # ----- Install node.js --------------------------------------
 cont="n"
@@ -158,9 +171,8 @@ if [ "$q" == "y" ] || [ "$q" == "Y" ]; then
 		compileNode=1
 	fi
 fi
+
 # echo -e "\n"
-
-
 
 #####################################################################################
 ## DEFAULT CHANGES
@@ -170,9 +182,6 @@ sudo cp -f files/.nanorc /home/pi					# Set bash environment
 sudo chown pi:pi /home/pi/.bashrc
 sudo chown pi:pi /home/pi/.nanorc
 mkdir ~/temp
-
-
-
 
 #####################################################################################
 ## RERESH SYSTEM WITH APT-GET LIBRARY UPDATE & UPGRADE
@@ -191,10 +200,6 @@ if [ "$refreshSystem" == "1" ]; then
 
 fi
 
-
-
-
-
 #####################################################################################
 ## Install Avahi Daemon for zeroconf access (raspberrypi.local)
 #####################################################################################
@@ -209,10 +214,6 @@ if [ "$installAvahi" == "1" ]; then
 	# echo -n "-- Press any key to continue --"; read -n 1 cont; echo
 
 fi
-
-
-
-
 
 #####################################################################################
 ## Installing bluetooth tools
@@ -232,10 +233,6 @@ if [ "$installBluetooth" == "1" ]; then
 
 fi
 
-
-
-
-
 #####################################################################################
 ## ADJUSTING SYSTEM SETTINGS
 #####################################################################################
@@ -251,10 +248,6 @@ if [ "$setupLocale" == "1" ]; then
 	# echo -n "-- Press any key to continue --"; read -n 1 cont; echo
 
 fi
-
-
-
-
 
 #####################################################################################
 ## SETTING UP WIRELESS NETWORKING
@@ -289,9 +282,6 @@ if [ "$setupWifi" == "1" ]; then
 	# echo -n "-- Press any key to continue --"; read -n 1 cont; echo
 
 fi
-
-
-
 
 #####################################################################################
 ## SETTING UP ADHOC WIRELESS NETWORKING
@@ -340,7 +330,6 @@ if [ "$setupAdhocWifi" == "1" ]; then
 
 fi
 
-
 #####################################################################################
 ## SETTING UP USER ENVIRONMENT
 #####################################################################################
@@ -384,10 +373,6 @@ if [ "$setupPrimaryUser" == "1" ]; then
 
 fi
 
-
-
-
-
 #####################################################################################
 ## Changing Pi Password
 #####################################################################################
@@ -403,10 +388,6 @@ if [ "$changePiPwd" == "1" ]; then
 	# echo -n "-- Press any key to continue --"; read -n 1 cont; echo
 fi
 
-
-
-
-
 #####################################################################################
 ## Expand filesystem to the maximum on the card
 #####################################################################################
@@ -421,9 +402,6 @@ if [ "$expandFilesystem" == "1" ]; then
 	echo -e "\n\nFilesystem expansion complete"
 	# echo -n "-- Press any key to continue --"; read -n 1 cont; echo
 fi
-
-
-
 
 #####################################################################################
 ## Set up new hostname
@@ -449,10 +427,33 @@ if [ "$setupHostname" == "1" ]; then
 	# echo -n "-- Press any key to continue --"; read -n 1 cont; echo
 fi
 
+#####################################################################################
+## Install Puppet
+#####################################################################################
 
+if [ "$installPuppet" == "1" ]; then
 
+	clear; echo -e "\n\n\n\n\n\n\n\n\n\n"
+	echo -e " Installing Puppet..."
+	echo -e "-------------------------------------------------------------------------------------"
 
+	wget https://apt.puppetlabs.com/puppetlabs-release-precise.deb
+	sudo dpkg -i puppetlabs-release-precise.deb
+	sudo apt-get update
+	sudo apt-get install puppet
+	sudo service puppet stop
+	rm puppetlabs-release-precise.deb
 
+	sudo cp files/default_puppet /etc/default/puppet
+
+	cat files/puppet.conf | sed -e "s/\#PUPPET_SERVER/$puppetMasterURL/" > ./puppet.conf
+	sudo mv ./puppet.conf /etc/puppet/
+
+	sudo service puppet start
+
+	echo -e "\n\n Puppet agent install complete"
+	# echo -n "-- Press any key to continue --"; read -n 1 cont; echo
+fi
 
 #####################################################################################
 ## Install node.js
@@ -466,9 +467,9 @@ if [ "$installNode" == "1" ]; then
 
 	if [ "$compileNode" == "1" ]; then
 		cd ~/temp
-		wget http://nodejs.org/dist/v0.12.2/node-v0.12.2.tar.gz
-		tar -xvf node-v0.12.2.tar.gz
-		cd node-v0.12.2
+		wget http://nodejs.org/dist/$nodeVersion/node-$nodeVersion.tar.gz
+		tar -xvf node-$nodeVersion.tar.gz
+		cd node-$nodeVersion
 		sudo ./configure
 		sudo make
 		sudo make install
@@ -481,10 +482,6 @@ if [ "$installNode" == "1" ]; then
 	echo -e "\n\n Node JS install complete -- current version is $(node -v)"
 	# echo -n "-- Press any key to continue --"; read -n 1 cont; echo
 fi
-
-
-
-
 
 #####################################################################################
 ## Reboot the machine
