@@ -437,15 +437,22 @@ if [ "$installPuppet" == "1" ]; then
 	echo -e " Installing Puppet..."
 	echo -e "-------------------------------------------------------------------------------------"
 
+	# install Puppet
 	wget https://apt.puppetlabs.com/puppetlabs-release-precise.deb
 	sudo dpkg -i puppetlabs-release-precise.deb
 	sudo apt-get update
-	sudo apt-get install puppet
+	sudo apt-get -y -qq install puppet
 	sudo service puppet stop
 	rm puppetlabs-release-precise.deb
 
-	sudo cp files/default_puppet /etc/default/puppet
+	# add alias for hostname including the configured domain
+	currentHostname=`sudo cat /etc/hostname | tr -d " \t\n\r"`
+	sudo cp /etc/hosts ~
+	sudo sed -i "s/127.0.1.1.*$currentHostname/127.0.1.1\t$currentHostname\t$currentHostname.$domain/g" ~/hosts
+	sudo mv -f ~/hosts /etc
 
+	# configure Puppet
+	sudo cp files/default_puppet /etc/default/puppet
 	cat files/puppet.conf | sed -e "s/\#PUPPET_SERVER/$puppetMasterURL/" > ./puppet.conf
 	sudo mv ./puppet.conf /etc/puppet/
 
