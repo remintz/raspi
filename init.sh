@@ -150,7 +150,7 @@ if [ "$q" == "y" ] || [ "$q" == "Y" ]; then
 	installPuppet=1
 	cont="n"
 	while [ "$cont" != "y" ] && [ "$cont" != "Y" ]; do
-		echo -n "Enter Puppet master url: "; read puppetMasterURL
+		echo -n "Enter Puppet master url (ex: puppet.acn-iot.com): "; read puppetMasterURL
 		echo -n "Enter domain (ex: mydomain.com): "; read domain
 		echo -n "Puppet settings ok [y/n]? "; read -n 1 cont; echo
 	done
